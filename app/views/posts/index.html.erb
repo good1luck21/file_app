@@ -1,0 +1,47 @@
+<h1>Posts#index</h1>
+<p>Find me in app/views/posts/index.html.erb</p>
+<%= form_with model: @post, url: posts_path do |f| %>
+  <%= f.text_field :title %>
+  <%= f.file_field :image %>
+  <%= f.file_field :images, name: "post[images][]" %>
+  <%= f.file_field :images, name: "post[images][]" %>
+  <%= f.submit %>
+<% end %>
+
+<% @posts.each do |post| %>
+  <% if post.read %>
+    <input type="checkbox" name="post[read]" value="<%= post.read %>" data-id="<%= post.id %>" checked>
+  <% else %>
+    <input type="checkbox" name="post[read]" value="<%= post.read %>" data-id="<%= post.id %>">
+  <% end %>
+  <%= link_to post.title, post, onclick: "notBackHere()" %> | likes: <span id="likes"><%= post.likes.count %></span> |
+  <% if User.find(1).likes?(post) %>
+    <%= link_to "unlike", post_like_path(post), method: :delete %>
+  <% else %>
+    <%= link_to "like", post_like_path(post), method: :post %>
+  <% end %>
+  <br/>
+<% end %>
+
+<script>
+  $(function() {
+    $('input[type=checkbox]').change(function() {
+      var id = $(this).data('id');
+      $.ajax({
+        url: '/posts/' + id + '/read',
+        type: 'PUT',
+        data: {
+          post: {
+            read: $(this).is(':checked')
+          }
+        }
+      }).done((data) => {
+        console.log(data);
+      })
+    });
+  });
+
+  function notBackHere() {
+    window.history.pushState(null, null, window.location.href);
+  }
+</script>
